@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  fastapi:
+    image: bletvaska/python
+    ports:
+      - 8080:8080
+    volumes:
+      - ./app:/app
+    user: "${UID:-1000}:${GID:-1000}"
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+  
+  # timezone:
+  #   build: ./app
+  #   ports:
+  #     - 8080:8080
+  #   volumes:
+  #     - ./app:/app
+  
+  prometheus:
+    image: bitnami/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus/data:/opt/bitnami/prometheus/data
+      - ./config/prometheus/conf/prometheus.yaml:/opt/bitnami/prometheus/conf/prometheus.yml
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    command:
+      - '--path.rootfs=/host'
+    # network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+
+  loki:
+    image: grafana/loki
+    ports:
+      - 3100:3100
+  
+  grafana:
+    image: grafana/grafana
+    ports: 
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana

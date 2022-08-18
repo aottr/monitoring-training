@@ -1,3 +1,6 @@
 __pycache__/
 grafana/
 architecture.png
+.tool-versions
+config/prometheus/data
+images
